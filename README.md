@@ -1,1 +1,1 @@
-# StripDiff
+# StripeDiff

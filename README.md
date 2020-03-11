@@ -2,5 +2,5 @@
 
 Execution
 ----------
-In general, strapCalling can be executed by following command line options:
+In general, strapCalling.sh can be executed by following command line options:
 

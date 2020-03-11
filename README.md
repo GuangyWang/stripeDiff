@@ -1,4 +1,4 @@
-# StripeDiff
+# stripeDiff
 
 Execution
 ----------

@@ -1,3 +1,18 @@
+Usage: 
+
+Options:
+	-f CHARACTER, --inputFile=CHARACTER
+		Two input Hi-C contact maps (separated by comma)
+
+	-p CHARACTER, --parameter=CHARACTER
+		Two parameters for Hi-C contact maps (separated by comma)
+
+	-o CHARACTER, --output=CHARACTER
+		Output directory name
+
+	-h, --help
+		Show this help message and exit
+
 
 
 ### combine called differential stripes

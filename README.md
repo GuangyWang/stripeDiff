@@ -19,7 +19,7 @@ In general, strapCalling.sh can be executed by following command line options:
         <-b matrixB> defines the input matrix B
         
     Optional arguments:
-        [-l length] defines row and column number of split subcontact
+        [-l length] defines row and column number of split submatrix
         [-o outDir] defines the path to output files. It must be set if the two input matrices are not under the same directory
 
 

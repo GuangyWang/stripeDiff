@@ -16,7 +16,7 @@ Execution
 ----------
 In general, strapCalling.sh can be executed by following command line options:
 
-    strapCalling.sh [options]* <-a matrixA> <-b matrixB>
+    sh strapCalling.sh [options]* <-a matrixA> <-b matrixB>
     Required arguments:
         <-a matrixA> defines the input matrix A
         <-b matrixB> defines the input matrix B

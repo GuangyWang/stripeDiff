@@ -1,3 +1,5 @@
+set.seed(123)
+
 scores <- function (x, type = c("z", "t", "chisq", "iqr", "mad"), prob = NA, 
                     lim = NA) 
 {

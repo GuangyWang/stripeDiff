@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 import os
 import sys
@@ -127,13 +128,18 @@ def matrixSplit(command='matrixSplit'):
     parser.add_argument('command', default=None,
                         help="set as 'matrixSplit' to split Hi-C matrix.")
 
-    parser.add_argument('contact_map', help="Hi-C contact map.")
+    parser.add_argument('
+    
+    
+    
+    
+    contact_map', help="Hi-C contact map.")
 
     parser.add_argument('-o', '--output', dest="output", default='None',
                         help="path to output files")
 
     parser.add_argument('-l', '--length', dest="length", default=200,
-                        help="format of output files (xlsx or csv)")
+                        help="row and column number of subcontact")
 
     parser.add_argument('-p', '--print_subcontact', dest="print_subcontact", default=0,
                         help="format of output files (xlsx or csv)")

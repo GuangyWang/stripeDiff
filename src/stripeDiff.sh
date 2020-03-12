@@ -10,11 +10,11 @@
 usage() {
     echo "Usage: $0 [options]* <-a matrixA> <-b matrixB>"
     echo "Required arguments:"
-    echo "  <-a matrixA> defines the input matrix A."
-    echo "  <-b matrixB> defines the input matrix B."
+    echo "  <-a matrixA> defines the input matrix A"
+    echo "  <-b matrixB> defines the input matrix B"
     echo ""
     echo "Optional arguments:"
-    echo "	[-l length] defines row and column number of split subcontact"
+    echo "	[-l length] defines row and column number of split submatrix"
     echo "	[-o outDir] defines the path to output files. It must be set if the two input matrices are not under the same directory"
     exit $1
 }
@@ -78,8 +78,25 @@ fi
 
 ## The end of checking command line arguments
 
+## Split matrices A and B
+matrixSplit_0.0.3.py matrixSplit -c $matrixA -o ${outDir}/splitMatrixA
+if [ $? != 0 ]
+then
+	echo "*** error: Split matrix A failed ***"
+	usage 1
+else
+	echo "Matrix A is split successfully"
+fi
+matrixSplit_0.0.3.py matrixSplit -c $matrixB -o ${outDir}/splitMatrixB
+if [ $? != 0 ]
+then
+	echo "*** error: Split matrix B failed ***"
+	usage 1
+else
+	echo "Matrix B is split successfully"
+fi
 
-
+## Call differential stripes
 
 
 ### combine called differential stripes

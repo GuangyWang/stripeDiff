@@ -1,5 +1,6 @@
 # stripeDiff
 
+
 ## Installation
 The following codes install stripeDiff in home directory. Users can install it anywhere they want by changing '~' to their desired directory.
 
@@ -8,6 +9,8 @@ The following codes install stripeDiff in home directory. Users can install it a
     chmod 755 -R ~/stripeDiff/src
     echo 'export PATH=$PATH:~/stripeDiff/src' >> ~/.bash_profile
     source ~/.bash_profile
+    
+
 
 Execution
 ----------

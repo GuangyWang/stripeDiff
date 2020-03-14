@@ -7,7 +7,6 @@ The following codes install stripeDiff in home directory. Users can install it a
     cd ~
     git clone https://github.com/GuangyWang/stripeDiff.git
 
-    chmod 755 -R ~/stripeDiff/src
 
     
     

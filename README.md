@@ -20,6 +20,7 @@ In general, stripeCalling.sh can be executed by following command line options:
     Required arguments:
         <-a matrixA> defines the input matrix A
         <-b matrixB> defines the input matrix B
+        
         <-n name> defines two sample names and chromosome. e.g., wt,mutant,chr1
     Optional arguments:
         [-l length] defines row and column number of split submatrix

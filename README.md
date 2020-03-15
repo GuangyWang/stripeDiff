@@ -14,9 +14,9 @@ The following codes install stripeDiff in home directory. Users can install it a
 
 Execution
 ----------
-In general, strapCalling.sh can be executed by following command line options:
+In general, stripeCalling.sh can be executed by following command line options:
 
-    sh strapCalling.sh [options]* <-a matrixA> <-b matrixB>
+    sh /path_to_stripeCalling/stripeCalling.sh [options]* <-a matrixA> <-b matrixB> <-n name>
     Required arguments:
         <-a matrixA> defines the input matrix A
         <-b matrixB> defines the input matrix B

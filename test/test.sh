@@ -1,3 +1,7 @@
 #!/bin/sh
 
-sh /path_to_stripeDiff/stripeDiff.sh -a CH12_wt_chr19_chr19_10000_verbose.txt -b CH12_CTCFZF9to11_mutant_chr19_chr19_10000_verbose.txt -n wt,mutant,chr19
+gunzip wt.txt.gz
+gunzip mutant.txt.gz
+sh ../src/stripeDiff.sh  -a wt.txt -b mutant.txt -n wt,mutant,chr19
+gzip wt.txt
+gzip mutant.txt

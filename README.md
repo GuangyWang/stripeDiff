@@ -3,7 +3,7 @@
 If you use stripeDiff in your research, please cite: 
 
 ## Download
-The following codes download stripeDiff to home directory. Users can install it anywhere they want by changing '~' to their desired directory.
+The following codes download stripeDiff to the home directory. Users can install it anywhere they want by changing '~' to their desired directory.
 
     cd ~
     git clone https://github.com/GuangyWang/stripeDiff.git
@@ -20,7 +20,7 @@ Execution
 ----------
 In general, stripeCalling.sh can be executed by following command line options:
 
-    sh /path_to_stripeCalling/stripeCalling.sh [options]* <-a matrixA> <-b matrixB> <-n name>
+    sh /path/to/stripeCalling.sh [options]* <-a matrixA> <-b matrixB> <-n name>
     Required arguments:
         <-a matrixA> defines the input matrix A
         <-b matrixB> defines the input matrix B

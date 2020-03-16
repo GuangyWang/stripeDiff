@@ -4,7 +4,6 @@ If you use stripeDiff in your research, please cite:
 
 ## Download
 The following codes download stripeDiff to home directory. Users can install it anywhere they want by changing '~' to their desired directory.
-
     cd ~
     git clone https://github.com/GuangyWang/stripeDiff.git
     

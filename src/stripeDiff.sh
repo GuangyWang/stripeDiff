@@ -2,11 +2,11 @@
 ######
 # Copyright (c) 2020 Dr Kaifu Chen lab at the Houston Methodist Research Institute
 # Author: Guangyu Wang and Shuo Zhang
-# Contact:
+# Contact: gwang2@houstonmethodist.org and szhang3@houstonmethodist.org
 #
 ######
 
-## usage function tells users how to run stripeDiff.sh
+### usage function tells users how to run stripeDiff.sh
 usage() {
     echo "Usage: $0 [options]* <-a matrixA> <-b matrixB>"
     echo "Required arguments:"
@@ -22,8 +22,21 @@ usage() {
     exit $1
 }
 
-# get path for scripts
+# Get path for scripts and check if required scripts exist
 srcDir=$(dirname $0)
+# check if matrixUtils.py exists
+if [ ! -e $srcDir/matrixUtils.py ]
+then
+	echo "matrixUtils.py is not exist in $srcDir, please put all scripts in the directory containing stripeDiff.sh"
+	usage 1
+fi
+# check if the strieDiff.R exists
+if [ ! -e $srcDir/stripeDiffCalling.R ]
+then
+	echo "stripeDiffCalling.R is not exist in $srcDir, please put all scripts in the directory containing stripeDiff.sh\n"
+	usage 1
+fi
+
 
 ## Set default options
 # default output, can be set via -o
@@ -45,7 +58,7 @@ do
         [?]) usage 1 ;;
 	esac
 done
-echo $srcDir
+
 
 ### Check command line arguments
 # Check if matrix A is provided
@@ -84,10 +97,8 @@ else
 		usage 1
 	fi
 fi
-echo "The output directory is: "
-echo $outDir
 
-# check matrix name and chromsome are provided
+# Check if matrix name and chromsome are provided
 if [ -z "$name" ]
 then
 	echo "*** error: matrix name and chromsome must be provided ***"
@@ -97,7 +108,7 @@ else
 	aliasB=$(awk -F"," '{print $2}' <<< $name)
 	chrom=$(awk -F"," '{print $3}' <<< $name)
 fi
- ### The end of checking command line arguments
+### The end of checking command line arguments
 
 
 ### Split matrices A and B
@@ -109,9 +120,8 @@ then
 fi
 COMMENT
 
-echo
 echo "Spliting $matrixA ......"
-python ${srcDir}/matrixUtils.py matrixSplit $matrixA -l $length -o ${outDir}/${aliasA}_${chrom}_splitMatrix
+python3 ${srcDir}/matrixUtils.py matrixSplit $matrixA -l $length -o ${outDir}/${aliasA}_${chrom}_splitMatrix
 if [ $? != 0 ]
 then
 	echo "*** error: Split $matrixA failed ***"
@@ -121,7 +131,7 @@ else
 fi
 
 echo "Spliting $matrixB ......"
-python ${srcDir}/matrixUtils.py matrixSplit $matrixB -l $length -o ${outDir}/${aliasB}_${chrom}_splitMatrix
+python3 ${srcDir}/matrixUtils.py matrixSplit $matrixB -l $length -o ${outDir}/${aliasB}_${chrom}_splitMatrix
 if [ $? != 0 ]
 then
 	echo "*** error: Split $matrixB failed ***"
@@ -140,7 +150,7 @@ mkdir stripes
 # get subchr comparisons
 echo ""
 echo "Extracting subchr comparisons ......"
-python ${srcDir}/matrixUtils.py getSubchrComparison ${aliasA}_splitMatrix ${aliasB}_splitMatrix subchrComparison.txt
+python3 ${srcDir}/matrixUtils.py getSubchrComparison ${aliasA}_${chrom}_splitMatrix ${aliasB}_${chrom}_splitMatrix subchrComparison.txt
 if [ $? != 0 ]
 then
 	echo "*** error: Extracting subchr comparisons is failed ***"
@@ -168,4 +178,17 @@ done < sorted_subchrComparison.txt
 
 
 ### combine called differential stripes
-python ${srcDir}/matrixUtils.py combineStripe stripes sorted_subchrComparison.txt $name
+# output: in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt and in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
+python3 ${srcDir}/matrixUtils.py combineStripe stripes sorted_subchrComparison.txt $name
+# sort differential stripes based on estimated position
+sort -k4,5 -n in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt > sorted_in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
+sort -k4,5 -n in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt > sorted_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt
+
+# remove duplications
+infile=sorted_in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
+outfile=deduplicated_in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
+python3 ${srcDir}/matrixUtils.py deduplicate $infile $outfile
+infile=sorted_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt
+outfile=deduplicated_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt
+python3 ${srcDir}/matrixUtils.py deduplicate $infile $outfile
+### End of combining called differential stripes

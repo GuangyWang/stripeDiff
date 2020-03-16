@@ -1,10 +1,7 @@
-#!/usr/bin/env python
 import numpy as np
-import pandas as pd
 import os
 import sys
 import argparse
-
 
 def file_split(file, resolution, outfile, length, print_subcontact, aliases):
     '''
@@ -47,9 +44,10 @@ def file_split(file, resolution, outfile, length, print_subcontact, aliases):
                 mean_list.append(np.mean(sub_contact2))
                 if print_subcontact != 1:
                     np.savetxt(out2, sub_contact2, delimiter='\t')
-        sub_contact = contact_map[(num * length):c, (num * length):c]
-        out = os.path.join(outfile, filename + '.' + str(num * length) + '.' + str(c) + '.subchr')
-        files.append(out)
+        if num*length != c:
+            sub_contact = contact_map[(num * length):c, (num * length):c]
+            out = os.path.join(outfile, filename + '.' + str(num * length) + '.' + str(c) + '.subchr')
+            files.append(out)
         mean_list.append(np.mean(sub_contact))
         if print_subcontact != 1:
             np.savetxt(out, sub_contact, delimiter='\t')
@@ -104,7 +102,7 @@ def file_split(file, resolution, outfile, length, print_subcontact, aliases):
 
 
 def printHelp():
-    print('\nmatrixSplit version 0.0.2')
+    print('\nmatrixSplit version 0.0.4')
     print('For help information for each function, try:\npython3 matrixSplit.py <function> -h')
     print('\nFunctions:')
     print('\tmatrixSplit:\n\t\t split Hi-C matrix\n')
@@ -154,6 +152,7 @@ def matrixSplit(command='matrixSplit'):
 
     if os.path.exists(outputPath):
         print('Output path already exits')
+        sys.exit(1)
     else:
         os.mkdir(outputPath)
         if os.path.exists(args.contact_map):
@@ -302,7 +301,7 @@ def combineStripe(command="combineStripe"):
         args.data_path += '/'
     
     # write output header
-    in_sample1 = "in_" + sample1 + "_not_" + sample2 + "_stripes.txt"
+    in_sample1 = "in_" + sample1 + "_not_" + sample2 + '_' + chrom + "_stripes.txt"
     outfh = open(in_sample1, 'w')
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
@@ -310,7 +309,7 @@ def combineStripe(command="combineStripe"):
         '\t' + "direction" + '\n')
     outfh.close()
 
-    in_sample2 = "in_" + sample2 + "_not_" + sample1 + "_stripes.txt"
+    in_sample2 = "in_" + sample2 + "_not_" + sample1 + '_' + chrom + "_stripes.txt"
     outfh = open(in_sample2, 'w')
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
@@ -329,6 +328,50 @@ def combineStripe(command="combineStripe"):
         reformat(infile1, start, chrom, in_sample1)
         reformat(infile2, start, chrom, in_sample2)
 
+
+def deduplicate(command="deduplicate"):
+    '''
+    deduplicate
+    '''
+
+    if (len(sys.argv) < 3) and ('-h' not in sys.argv) and ('--help' not in sys.argv):
+        # at least two parameters need to be specified, will print help message if no parameter is specified
+        print("\nusage:\npython3 matrixUtil.py deduplicate <input> <output> " + \
+              "for more help, please try: python3 matrixSplit.py deduplicate -h\n")
+        return 0
+
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                     usage="\n\npython3 matrixSplit.py matrixSplit <contact_map_file_paths> "
+                                           "[optional arguments]\n\n", description='')
+
+    parser.add_argument('command', default='None',
+                        help="remove duplicated differential stripes")
+
+    parser.add_argument('infile', help="input file")
+    parser.add_argument('outfile', help="output file")
+    args = parser.parse_args()
+
+    outfh = open(args.outfile, 'w')
+    with open(args.infile) as f:
+        previousLine = "None"
+        previousStripe = []
+        for line in f:
+            currentStripe = line.strip().split()
+            if currentStripe[0] == "chrom":
+                outfh.write(line)
+            else:
+                if previousLine == "None":
+                    previousLine = line
+                    previousStripe = currentStripe[:]
+                elif int(currentStripe[3]) <= int(previousStripe[4]):
+                    if float(currentStripe[13]) < float(previousStripe[13]):
+                        previousLine = line
+                        previousStripe = currentStripe[:]
+                else:
+                    outfh.write(previousLine)
+                    previousLine = line
+                    previousStripe = currentStripe[:]
+    outfh.close()
 
 
 def readComparison(infile):
@@ -350,8 +393,10 @@ def reformat(infile, start, chrom, outfile):
             line = chrom + '\t'
             for i in range(4):
                 line += str(int(row[i]) + start) + '\t'
-                for i in range(4, 14):
-                    line += str(row[i])
+            for i in range(4, 13):
+                line += str(row[i]) + '\t'
+            row[13] = row[13].lstrip('"')
+            row[13] = row[13].rstrip('"')
             outfh.write(line + '\n')
     outfh.close()
 
@@ -371,10 +416,12 @@ if __name__ == "__main__":
             getSubchrComparison(command="getSubchrComparison")
         elif sys.argv[1] == "combineStripe":
             combineStripe(command="combineStripe")
+        elif sys.argv[1] == "deduplicate":
+            deduplicate(command="deduplicate")
         else:
             printHelp()
     else:
-        print('\nmatrixSplit version 0.0.2')
+        print('\nmatrixSplit version 0.0.4')
         print('For a list of functions in matrixSplit, please try:\npython3 matrixSplit.py -h')
         print('')
 

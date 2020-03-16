@@ -12,6 +12,8 @@ To test stripeDiff, change to the "test" directory and run test.sh
 
     cd stripeDiff/test
     sh test.sh
+
+
     
     
 

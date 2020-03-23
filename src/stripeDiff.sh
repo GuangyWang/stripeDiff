@@ -85,10 +85,14 @@ matrixBDir=$(dirname $matrixB)
 matrixBBase=$(basename $matrixB)
 if [ ! -z "$outDir" ]
 then
-	if [ ! -d $outdir ]
+	if [ ! -d $outDir ]
 	then
-		echo "*** error: provided output directory doesn't exist ***"
-		usage 1
+		mkdir $outDir
+		if [ $? != 0 ]
+		then
+			echo "*** error: provided output directory doesn't exist and cannot be created ***"
+			usage 1
+		fi
 	fi
 else
 	if [ "$matrixADir" == "$matrixBDir" ]

@@ -22,8 +22,11 @@ usage() {
     exit $1
 }
 
-# Get path for scripts and check if required scripts exist
+# Get absolute path for scripts and check if required scripts exist
 srcDir=$(dirname $0)
+cd $srcDir
+srcDir=$PWD
+cd -
 # check if matrixUtils.py exists
 if [ ! -e $srcDir/matrixUtils.py ]
 then

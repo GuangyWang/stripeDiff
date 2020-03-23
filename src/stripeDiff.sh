@@ -24,6 +24,8 @@ usage() {
 
 # Get path for scripts and check if required scripts exist
 srcDir=$(dirname $0)
+cd $srcDir
+$srcDir=$PWD
 # check if matrixUtils.py exists
 if [ ! -e $srcDir/matrixUtils.py ]
 then
@@ -145,8 +147,8 @@ fi
 ### Call differential stripes
 cd $outDir
 # The stripes directory contains called differential stripes
-[ -d stripes ] && rm -r stripes
-mkdir stripes
+[ -d ${chrom}_stripes ] && rm -r ${chrom}_stripes
+mkdir ${chrom}_stripes
 # get subchr comparisons
 echo ""
 echo "Extracting subchr comparisons ......"
@@ -162,7 +164,7 @@ echo ""
 
 while read -r comparison subchrA parameterA subchrB parameterB
 do
-	stripeOutDir="./stripes/${aliasA}_${aliasB}.${comparison}"
+	stripeOutDir="./${chrom}_stripes/${aliasA}_${aliasB}.${comparison}"
 	echo "Calling stripes for ${stripeOutDir} ......"
 	Rscript ${srcDir}/stripeDiffCalling.R -f ${subchrA},${subchrB} -p ${parameterA},${parameterB} -o ${stripeOutDir}
 	if [ $? != 0 ]
@@ -179,7 +181,9 @@ done < sorted_subchrComparison.txt
 
 ### combine called differential stripes
 # output: in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt and in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
-python3 ${srcDir}/matrixUtils.py combineStripe stripes sorted_subchrComparison.txt $name
+# get resolution
+resolution=10000
+python3 ${srcDir}/matrixUtils.py combineStripe ${chrom}_stripes sorted_subchrComparison.txt $resolution $name
 # sort differential stripes based on estimated position
 sort -k4,5 -n in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt > sorted_in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
 sort -k4,5 -n in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt > sorted_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt

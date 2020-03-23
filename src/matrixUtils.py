@@ -19,7 +19,8 @@ def file_split(file, resolution, outfile, length, print_subcontact, aliases):
         filename = aliases
     else:
         filename = os.path.splitext(base)[0]
-    contact_map = readMatrix(file, resolution)
+    contact_map, temp_res = readMatrix(file, resolution)
+
     r, c = contact_map.shape
     num = int(r/length)
     mean_list = []
@@ -102,7 +103,7 @@ def file_split(file, resolution, outfile, length, print_subcontact, aliases):
 
 
 def printHelp():
-    print('\nmatrixSplit version 0.0.4')
+    print('\nmatrixSplit version 0.0.5')
     print('For help information for each function, try:\npython3 matrixSplit.py <function> -h')
     print('\nFunctions:')
     print('\tmatrixSplit:\n\t\t split Hi-C matrix\n')
@@ -166,12 +167,19 @@ def matrixSplit(command='matrixSplit'):
 
 
 def readMatrix(file, resolution):
+    """
+    read input matrix
+    :param file: input matrix, could be verbose or spare format (refer juicer dump)
+    : resolution: bin size of the contact matrix
+    """
     fh = open(file)
     first_line = fh.readline()
     first_line = first_line.strip().split()
     if len(first_line) > 3: # It is a dense matrix
         fh.close()
-        return np.loadtxt(file)
+        res = np.loadtxt(file)
+        resolution = res[0, 1] - res[0, 0]
+        return (res, resolution)
     else:
         max_site = 0
         inferred_resolution = 0
@@ -183,13 +191,15 @@ def readMatrix(file, resolution):
             distance = abs(start - end)
             if inferred_resolution == 0:
                 inferred_resolution = distance
-            elif distance > 0 and inferred_resolution > distance: # resolution is the smallest distance between two interacting loci
+            # resolution is the smallest distance between two interacting loci
+            elif distance > 0 and inferred_resolution > distance: 
                 inferred_resolution = distance
         fh.close()
 
         # if resolution is not provided, inferred resolution will be used
         if resolution == "None":
             resolution = inferred_resolution
+
         # create a all-zero matrix
         dim = max_site // resolution + 1
         res = np.zeros((dim, dim))
@@ -203,7 +213,7 @@ def readMatrix(file, resolution):
                 col_index = end // resolution
                 res[row_index][col_index] = interaction
                 res[col_index][row_index] = interaction
-        return res
+        return (res, resolution)
 
 
 def getSubchrComparison(command="getSubchrComparison"):
@@ -213,13 +223,13 @@ def getSubchrComparison(command="getSubchrComparison"):
 
     if (len(sys.argv) < 4) and ('-h' not in sys.argv) and ('--help' not in sys.argv):
         # at least three parameters need to be specified, will print help message if no parameter is specified
-        print("\nusage:\npython3 matrixUtil.py matrixSplit <contact_map_file_paths> [optional arguments]\n\n"
-              "for more help, please try: python3 matrixSplit.py matrixSplit -h\n")
+        print("\nusage:\npython3 matrixUtil.py getSubchrComparison <matrixA_path> <matrixB_path> <outfile>\n\n"
+              "for more help, please try: python3 matrixSplit.py getSubchrComparison -h\n")
         return 0
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     usage="\n\npython3 matrixSplit.py matrixSplit <contact_map_file_paths> "
-                                           "[optional arguments]\n\n", description='')
+                                     usage="\n\npython3 matrixUtil.py getSubchrComparison \
+                                          <matrixA_path> <matrixB_path> <outfile>\n\n", description='')
 
     parser.add_argument('command', default='None',
                         help="set as 'getSubchrComparison' to get comparisons of two sub contact map.")
@@ -270,25 +280,25 @@ def getSubchrComparison(command="getSubchrComparison"):
 
 def combineStripe(command="combineStripe"):
     '''
-    combineStripe
+    combineStripe: combine identified stripes from sub matrix
     '''
 
     if (len(sys.argv) < 4) and ('-h' not in sys.argv) and ('--help' not in sys.argv):
         # at least three parameters need to be specified, will print help message if no parameter is specified
-        print("\nusage:\npython3 matrixUtil.py matrixSplit <contact_map_file_paths> [optional arguments]\n\n"
-              "for more help, please try: python3 matrixSplit.py matrixSplit -h\n")
+        print("\nusage:\npython3 matrixUtil.py combineStripe <data_path> <comparison> <resolution> <name>\n\n"
+              "for more help, please try: python3 matrixUtil.py combineStripe -h\n")
         return 0
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     usage="\n\npython3 matrixSplit.py matrixSplit <contact_map_file_paths> "
-                                           "[optional arguments]\n\n", description='')
+                                     usage="\n\npython3 matrixUtil.py combineStripe <data_path> <comparison> \
+                                          <resolution> <name>\n\n", description='')
 
     parser.add_argument('command', default='None',
                         help="combine differential stripes")
 
     parser.add_argument('data_path', help="path to differential stripes")
     parser.add_argument('comparison', help="get comparison position")
-    
+    parser.add_argument('resolution', type=int, help="the resolution of contact matrix")
     parser.add_argument('name', help="two sample names and chromosome. e.g., wt,mutant,chr1")
     
     args = parser.parse_args()
@@ -303,6 +313,7 @@ def combineStripe(command="combineStripe"):
     # write output header
     in_sample1 = "in_" + sample1 + "_not_" + sample2 + '_' + chrom + "_stripes.txt"
     outfh = open(in_sample1, 'w')
+    # write the header
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
         '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" + \
@@ -311,6 +322,7 @@ def combineStripe(command="combineStripe"):
 
     in_sample2 = "in_" + sample2 + "_not_" + sample1 + '_' + chrom + "_stripes.txt"
     outfh = open(in_sample2, 'w')
+    # write the header
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
         '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" + \
@@ -325,13 +337,13 @@ def combineStripe(command="combineStripe"):
         infile2 = args.data_path + sample1 + '_' + sample2 + '.' + position + "/2.txt"
         if (not os.path.exists(infile1)) or (not os.path.exists(infile2)):
             continue
-        reformat(infile1, start, chrom, in_sample1)
-        reformat(infile2, start, chrom, in_sample2)
+        reformat(infile1, start, chrom, args.resolution, in_sample1)
+        reformat(infile2, start, chrom, args.resolution, in_sample2)
 
 
 def deduplicate(command="deduplicate"):
     '''
-    deduplicate
+    deduplicate: remove duplicated stripes
     '''
 
     if (len(sys.argv) < 3) and ('-h' not in sys.argv) and ('--help' not in sys.argv):
@@ -341,8 +353,7 @@ def deduplicate(command="deduplicate"):
         return 0
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     usage="\n\npython3 matrixSplit.py matrixSplit <contact_map_file_paths> "
-                                           "[optional arguments]\n\n", description='')
+                                     usage="\n\npython3 matrixUtil.py deduplicate <input> <output>\n\n", description='')
 
     parser.add_argument('command', default='None',
                         help="remove duplicated differential stripes")
@@ -371,6 +382,9 @@ def deduplicate(command="deduplicate"):
                     outfh.write(previousLine)
                     previousLine = line
                     previousStripe = currentStripe[:]
+        # write the last line
+        if previousLine != "None":
+            outfh.write(previousLine)
     outfh.close()
 
 
@@ -383,29 +397,58 @@ def readComparison(infile):
     return mylist
 
 
-def reformat(infile, start, chrom, outfile):
+def reformat(infile, start, chrom, BP, outfile):
+    """
+    reformat identified stripes
+    : param infile: identified stripes
+    : param start: the start coordinate of split sub matrix
+    : chrom: chromosome
+    : BP: resolution in base pair
+    : outfile: output file
+    """
     outfh = open(outfile, 'a+')
     with open(infile) as f:
         for row in f:
             row = row.strip().split()
+            # skip the header and lines containing a "NA"
             if "upPeak.loc" in row[0] or "NA" in row:
                 continue
             line = chrom + '\t'
-            for i in range(4):
-                line += str(int(row[i]) + start) + '\t'
+
+            # swap if lower boundary is bigger than upper boundary
+            if int(row[0]) > int(row[1]):
+                line += str((int(row[1]) + start)*BP) + '\t' 
+                line += str((int(row[0]) + start)*BP) + '\t'
+            else:
+                line += str((int(row[0]) + start)*BP) + '\t'
+                line += str((int(row[1]) + start)*BP) + '\t' 
+            if int(row[2]) > int(row[3]):
+                line += str((int(row[3]) + start)*BP) + '\t'
+                line += str((int(row[2]) + start)*BP) + '\t'
+            else:
+                line += str((int(row[2]) + start)*BP) + '\t'
+                line += str((int(row[3]) + start)*BP) + '\t'
+
             for i in range(4, 13):
                 line += str(row[i]) + '\t'
             row[13] = row[13].lstrip('"')
             row[13] = row[13].rstrip('"')
+            line += row[13]
             outfh.write(line + '\n')
     outfh.close()
+    return
 
 
 def getParameter(infile):
-	with open(infile) as f:
-		line = f.readline()
-		line = line.strip().split()
-		return line[0]
+    """
+    get parameter from input file
+    : param infile: an input file containing desired parameter
+    """
+    with open(infile) as f:
+        line = f.readline()
+        line = line.strip().split()
+        # the first element is the parameter
+        return line[0]
 
 
 if __name__ == "__main__":
@@ -421,7 +464,7 @@ if __name__ == "__main__":
         else:
             printHelp()
     else:
-        print('\nmatrixSplit version 0.0.4')
+        print('\nmatrixSplit version 0.0.5')
         print('For a list of functions in matrixSplit, please try:\npython3 matrixSplit.py -h')
         print('')
 

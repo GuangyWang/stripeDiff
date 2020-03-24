@@ -157,13 +157,13 @@ mkdir ${chrom}_stripes
 # get subchr comparisons
 echo ""
 echo "Extracting subchr comparisons ......"
-python3 ${srcDir}/matrixUtils.py getSubchrComparison ${aliasA}_${chrom}_splitMatrix ${aliasB}_${chrom}_splitMatrix subchrComparison.txt
+python3 ${srcDir}/matrixUtils.py getSubchrComparison ${aliasA}_${chrom}_splitMatrix ${aliasB}_${chrom}_splitMatrix subchrComparison_${chrom}.txt
 if [ $? != 0 ]
 then
 	echo "*** error: Extracting subchr comparisons is failed ***"
 	usage 1
 fi
-sort -k1 -n subchrComparison.txt > sorted_subchrComparison.txt
+sort -k1 -n subchrComparison_${chrom}.txt > sorted_subchrComparison_${chrom}.txt
 echo "Extracting subchr comparisons is done!"
 echo ""
 
@@ -180,7 +180,7 @@ do
 		echo "Calling stripes for ${stripeOutDir} is Done!"
 	fi
 	echo
-done < sorted_subchrComparison.txt
+done < sorted_subchrComparison_${chrom}.txt
 ### End of calling differential stripes
 
 
@@ -188,7 +188,7 @@ done < sorted_subchrComparison.txt
 # output: in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt and in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
 # get resolution
 resolution=10000
-python3 ${srcDir}/matrixUtils.py combineStripe ${chrom}_stripes sorted_subchrComparison.txt $resolution $name
+python3 ${srcDir}/matrixUtils.py combineStripe ${chrom}_stripes sorted_subchrComparison_${chrom}.txt $resolution $name
 # sort differential stripes based on estimated position
 sort -k4,5 -n in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt > sorted_in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
 sort -k4,5 -n in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt > sorted_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt
@@ -201,3 +201,7 @@ infile=sorted_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt
 outfile=deduplicated_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt
 python3 ${srcDir}/matrixUtils.py deduplicate $infile $outfile
 ### End of combining called differential stripes
+
+
+
+

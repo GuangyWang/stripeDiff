@@ -201,3 +201,7 @@ infile=sorted_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt
 outfile=deduplicated_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt
 python3 ${srcDir}/matrixUtils.py deduplicate $infile $outfile
 ### End of combining called differential stripes
+
+
+
+

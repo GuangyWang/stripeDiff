@@ -188,7 +188,7 @@ done < sorted_subchrComparison_${chrom}.txt
 # output: in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt and in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
 # get resolution
 resolution=10000
-python3 ${srcDir}/matrixUtils.py combineStripe ${chrom}_stripes sorted_subchrComparison_${chrom}.txt $resolution $name
+python3 ${srcDir}/matrixUtils.py combineStripe ${chrom}_stripes subchrComparison_${chrom}.txt $resolution $name
 # sort differential stripes based on estimated position
 sort -k4,5 -n in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt > sorted_in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
 sort -k4,5 -n in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt > sorted_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt

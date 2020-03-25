@@ -45,6 +45,29 @@ In general, stripeCalling.sh can be executed by following command line options:
         [-o outDir] defines the path to output files. It must be set if the two input matrices are not under the same directory
         [-r resolution] defines the bin size. If it is not provided, the bin number of identified stripes will be output
 
+## Input
+The main input are two Hi-C matrices. Each matrix could be in sparse (N * N) or verbose format. The verbose format should have three column. The first two columns are two genomic regions, and the third column is the interaction frequency. 
+
+## Output
+stripeDiff has two output tables: stripes present in matrix A and stripes present in matrix B
+
+| column | explaination |
+| 1st | chromosome |
+| 2nd | left boundary of a stripe |
+| 3rd | right boundary of a stripe |
+| 4th | expanded left boundary of a stripe |
+| 5th | expanded right boundary of a stripe |
+| 6th | left signal of a stripe in Matrix A |
+| 7th | right signal of a stripe in Matrix A |
+| 8th | signal fold change of a stripe in Matrix A |
+| 9th | P value of a stripe in Matrix A |
+| 10th | left signal of a stripe in Matrix B |
+| 11th | right signal of a stripe in Matrix B |
+| 12th | signal fold change of a stripe in Matrix B |
+| 13th | P value of a stripe in Matrix B |
+| 14th | P value for a differential stripe |
+| 15th | direction of a stripe, could be left or right |
+
 
 ## Contacts
 If you find any bugs or have difficulties in using stripeDiff, please feel free to contact Guangyu Wang (gwang2@houstonmethodist.org).

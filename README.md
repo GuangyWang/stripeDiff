@@ -52,6 +52,7 @@ The main input are two Hi-C matrices. Each matrix could be in sparse (N * N) or 
 stripeDiff has two output tables: stripes present in matrix A and stripes present in matrix B
 
 | column | explaination |
+| ------| ------|
 | 1st | chromosome |
 | 2nd | left boundary of a stripe |
 | 3rd | right boundary of a stripe |

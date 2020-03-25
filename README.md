@@ -5,8 +5,6 @@ Copyright (c) 2020 Dr. Kaifu Chen lab at the Houston Methodist Hospital
 
 Current version v1.0
 
-If you use stripeDiff in your research, please cite: 
-
 
 ## How does stripeDiff work
 

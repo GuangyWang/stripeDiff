@@ -27,7 +27,7 @@ To test stripeDiff, change to the "test" directory and run test.sh
 Running stripeDiff requires python 3.5.1 or above, R 3.5.1 or above, and the following packages:
 - [numpy](https://numpy.org)
 - [bcp](https://cran.r-project.org/web/packages/bcp/index.html)
-- [plotly](https://plotly.com/r/)
+- [plotly](https://cran.r-project.org/web/packages/plotly/index.html)
 - [proxy](https://cran.r-project.org/web/packages/proxy/index.html)
 - [zoo](https://cran.r-project.org/web/packages/zoo/index.html)
 

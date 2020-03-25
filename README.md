@@ -46,7 +46,13 @@ In general, stripeCalling.sh can be executed by following command line options:
         [-r resolution] defines the bin size. If it is not provided, the bin number of identified stripes will be output
 
 ## Input
-The main input are two Hi-C matrices. Each matrix could be in sparse (N * N) or verbose format. The verbose format should have three column. The first two columns are two genomic regions, and the third column is the interaction frequency. 
+The main input are two Hi-C matrices. Each matrix could be in sparse (N * N) or verbose format. The verbose format should have three column. The first two columns are two genomic regions, and the third column is the interaction frequency. Here is an example of verbose format (the table header is not needed):
+|region1|	region2|	contact frequency|
+| ------| ------|----|
+|3000000|	3000000|	2095.53|
+|3000000	|3010000	|279.50217|
+|3010000	|3010000	|2625.0593|
+|3000000	|3020000	|139.41035|
 
 ## Output
 stripeDiff has two output tables: stripes present in matrix A and stripes present in matrix B

@@ -1,7 +1,7 @@
 # stripeDiff
 stripeDiff is a software to identify differential stripes between two Hi-C samples. 
 
-Copyright (c) 2020 Dr. Kaifu Chen lab at the Houston Methodist Hospital
+Copyright (c) 2020 Dr. Kaifu Chen lab
 
 Current version v1.0
 

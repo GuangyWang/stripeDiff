@@ -133,7 +133,7 @@ def matrixSplit(command='matrixSplit'):
     parser.add_argument('-o', '--output', dest="output", default='None',
                         help="path to output files")
 
-    parser.add_argument('-l', '--length', dest="length", default=200,
+    parser.add_argument('-l', '--length', dest="length", default=300,
                         help="format of output files (xlsx or csv)")
 
     parser.add_argument('-p', '--print_subcontact', dest="print_subcontact", default=0,
@@ -326,7 +326,7 @@ def combineStripe(command="combineStripe"):
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
         '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" + \
-        '\t' + "direction" + '\n')
+       '\t' + "direction" + '\n')
     outfh.close()
 
     # combine stripe
@@ -363,13 +363,18 @@ def deduplicate(command="deduplicate"):
     args = parser.parse_args()
 
     outfh = open(args.outfile, 'w')
+    # write the header line
+    outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t' + "rightEdge" + '\t' + "upPeak.sample1" +
+                '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" +
+                '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" +
+                '\t' + "direction" + '\n')
     with open(args.infile) as f:
         previousLine = "None"
         previousStripe = []
         for line in f:
             currentStripe = line.strip().split()
             if currentStripe[0] == "chrom":
-                outfh.write(line)
+                continue
             else:
                 if previousLine == "None":
                     previousLine = line
@@ -431,9 +436,11 @@ def reformat(infile, start, chrom, BP, outfile):
 
             for i in range(4, 13):
                 line += str(row[i]) + '\t'
+            # row[13] is "left" or "right"
             row[13] = row[13].lstrip('"')
             row[13] = row[13].rstrip('"')
-            line += row[13]
+            line += row[13] + '\t'
+            line += row[14]
             outfh.write(line + '\n')
     outfh.close()
     return

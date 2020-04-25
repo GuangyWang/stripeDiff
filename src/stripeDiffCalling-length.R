@@ -543,7 +543,7 @@ parameter = opt$parameter
 parameters = unlist(strsplit(parameter, ","))
 hicMap1 = read.table(maps[1])
 hicMap2 = read.table(maps[2])
-out = diffStrap(hicMap1, hicMap2, as.numeric(parameters[1]), as.numeric(parameters[2]))
+out = diffStripe(hicMap1, hicMap2, as.numeric(parameters[1]), as.numeric(parameters[2]))
 dir.create(file.path(getwd(), opt$output), showWarnings = FALSE)
 write.table(out[[1]], file.path(getwd(), opt$output, '1.txt'), sep='\t', row.names = F)
 write.table(out[[2]], file.path(getwd(), opt$output, '2.txt'), sep='\t', row.names = F)

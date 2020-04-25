@@ -1,11 +1,4 @@
 set.seed(123)
-suppressMessages(require(bcp))
-suppressMessages(require(plotly))
-suppressMessages(require(proxy))
-suppressMessages(require(zoo))
-suppressMessages(require(changepoint))
-
-
 scores <- function (x, type = c("z", "t", "chisq", "iqr", "mad"), prob = NA, 
                     lim = NA) 
 {
@@ -386,28 +379,36 @@ compareStripe <- function(list1, list2){
     stripe2[,ncol(stripe2) + 1] = apply(stripe2, 1, FUN=getUp)
     stripe2[,ncol(stripe2) + 1] =  apply(stripe2, 1, FUN=getDown)
     stripe2[,ncol(stripe2) + 1] = log(abs(stripe2[,ncol(stripe2)-1])/apply(data.frame(-stripe2[,ncol(stripe2)],0.0001),1,FUN=max))
-    #stripe2[,ncol(stripe2) + 1] = log(abs(stripe2[,ncol(stripe2)-1])/abs(stripe2[,ncol(stripe2)]))
     stripe2[,ncol(stripe2) + 1] =  apply(stripe2, 1, FUN=getPvalue)
     stripe2[(nrow(stripe2)+1),] <- NA
     return((stripe2))
   }
   
-  stripe1 = foldChange(list1[[1]], list1[[2]], list1[[3]], list1[[4]], -list1[[5]])
-  stripe1 = foldChange(stripe1, list2[[2]], list2[[3]], list2[[4]], -list2[[5]])
-  stripe2 = foldChange(list2[[1]], list2[[2]], list2[[3]], list2[[4]], -list2[[5]])
-  stripe2 = foldChange(stripe2, list1[[2]], list1[[3]], list1[[4]], -list1[[5]])
+  if(nrow(list1[[1]])>1){
+    stripe1 = foldChange(list1[[1]], list1[[2]], list1[[3]], list1[[4]], -list1[[5]])
+    stripe1 = foldChange(stripe1, list2[[2]], list2[[3]], list2[[4]], -list2[[5]])
+  }else{
+    stripe1 = data.frame(t(rep(NA, 12)))
+  }
+  if(nrow(list2[[1]])>1){
+    stripe2 = foldChange(list2[[1]], list2[[2]], list2[[3]], list2[[4]], -list2[[5]])
+    stripe2 = foldChange(stripe2, list1[[2]], list1[[3]], list1[[4]], -list1[[5]])
+  }else{
+    stripe2 = data.frame(t(rep(NA, 12)))
+  }
   
   stripe1$pvalue = pnorm(stripe1[,7]-stripe1[,11],0,2*0.5538227^2)
   colnames(stripe1) <- c('upPeak.loc', 'downPeak.loc', 'leftEdge', 'rightEdge', 'upPeak.sample1', 
-                        'downPeak.sample1', 'logFoldChange.sample1', 'stripe.pValue.sample1', 'upPeak.sample2', 
-                        'downPeak.sample2', 'logFoldChange.sample2', 'stripe.pValue.sample2', 'diffStripe.pValue')
+                         'downPeak.sample1', 'logFoldChange.sample1', 'stripe.pValue.sample1', 'upPeak.sample2', 
+                         'downPeak.sample2', 'logFoldChange.sample2', 'stripe.pValue.sample2', 'diffStripe.pValue')
   
   stripe2$pvalue = pnorm(stripe2[,7]-stripe2[,11],0,2*0.5538227^2)
   colnames(stripe2) <- c('upPeak.loc', 'downPeak.loc', 'leftEdge', 'rightEdge', 'upPeak.sample2', 
-                        'downPeak.sample2', 'logFoldChange.sample2', 'stripe.pValue.sample2', 'upPeak.sample1', 
-                        'downPeak.sample1', 'logFoldChange.sample1', 'stripe.pValue.sample1', 'diffStripe.pValue')
+                         'downPeak.sample2', 'logFoldChange.sample2', 'stripe.pValue.sample2', 'upPeak.sample1', 
+                         'downPeak.sample1', 'logFoldChange.sample1', 'stripe.pValue.sample1', 'diffStripe.pValue')
   return(list(stripe1, stripe2))
 }
+
 
 stripeLocation <- function(stripe, contactMap, upLimit, j, p, outputName5 = 'NA', outputName6 = 'NA', outputName7='NA', direct){
   # stripeMap: contact map for the pre-stripe
@@ -525,6 +526,12 @@ diffStripe <- function(contactMap1, contactMap2, upLimit1, upLimit2){
 
 suppressMessages(library("optparse"))
 options(warn=-1)
+suppressMessages(require(bcp))
+suppressMessages(require(plotly))
+suppressMessages(require(proxy))
+suppressMessages(require(zoo))
+suppressMessages(require(changepoint))
+
 
 option_list = list(
   make_option(c("-f", "--inputFile"), type="character", 

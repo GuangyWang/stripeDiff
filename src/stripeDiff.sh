@@ -29,7 +29,7 @@ usage() {
 # default output, can be set via -o
 outDir=""
 # default row and column number of split submatrix is 200. It can be set via -l
-length=200
+length=300
 # default bin size, can be set via -r
 resolution=""
 ### The end of setting default options

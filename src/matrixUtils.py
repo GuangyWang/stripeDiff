@@ -317,7 +317,7 @@ def combineStripe(command="combineStripe"):
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
         '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" + \
-        '\t' + "direction" + '\n')
+        '\t' + "direction" '\t' + "stripeLength" + '\n')
     outfh.close()
 
     in_sample2 = "in_" + sample2 + "_not_" + sample1 + '_' + chrom + "_stripes.txt"
@@ -326,7 +326,7 @@ def combineStripe(command="combineStripe"):
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
         '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" + \
-       '\t' + "direction" + '\n')
+       '\t' + "direction" '\t' + "stripeLength" + '\n')
     outfh.close()
 
     # combine stripe
@@ -367,7 +367,7 @@ def deduplicate(command="deduplicate"):
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t' + "rightEdge" + '\t' + "upPeak.sample1" +
                 '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" +
                 '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" +
-                '\t' + "direction" + '\n')
+                '\t' + "direction" + '\t' + "stripeLength" + '\n')
     with open(args.infile) as f:
         previousLine = "None"
         previousStripe = []
@@ -394,6 +394,10 @@ def deduplicate(command="deduplicate"):
 
 
 def readComparison(infile):
+    """
+    read comparison files into a list
+    : param infile: a TAB-delimited file containing 5 field and the first one is the coordinate of split sub-matrix
+    """
     mylist = []
     with open(infile) as f:
         for line in f:

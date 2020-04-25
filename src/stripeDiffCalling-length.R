@@ -504,14 +504,16 @@ diffStripe <- function(contactMap1, contactMap2, upLimit1, upLimit2){
   addLength<-function(pair, contactMap, upLimit){
     contactMap.reverse = t(contactMap[nrow(contactMap):1, ncol(contactMap):1])
     pair$stripeLength = 0
-    for(i in 1:(nrow(pair)-1)){
-      if(pair[i,]$diffStripe.pValue < 0.05){
-        if(pair[i,]$direction == 'left'){
-          stripeL = stripeLocation(pair, contactMap, upLimit, i, 0.8, direct=pair[i,]$direction)
-          pair[i,]$stripeLength = stripeL
-        }else{
-          stripeL = stripeLocation(pair, contactMap.reverse, upLimit, i, 0.8, direct=pair[i,]$direction)
-          pair[i,]$stripeLength = nrow(contactMap.reverse) - stripeL  ## change
+    if(nrow(pair)>1){
+      for(i in 1:(nrow(pair)-1)){
+        if(pair[i,]$diffStripe.pValue < 0.05){
+          if(pair[i,]$direction == 'left'){
+            stripeL = stripeLocation(pair, contactMap, upLimit, i, 0.8, direct=pair[i,]$direction)
+            pair[i,]$stripeLength = stripeL
+          }else{
+            stripeL = stripeLocation(pair, contactMap.reverse, upLimit, i, 0.8, direct=pair[i,]$direction)
+            pair[i,]$stripeLength = nrow(contactMap.reverse) - stripeL  ## change
+          }
         }
       }
     }

@@ -28,6 +28,7 @@ Running stripeDiff requires python 3.5.1 or above, R 3.5.1 or above, and the fol
 - [plotly](https://cran.r-project.org/web/packages/plotly/index.html)
 - [proxy](https://cran.r-project.org/web/packages/proxy/index.html)
 - [zoo](https://cran.r-project.org/web/packages/zoo/index.html)
+- [changepoint](https://cran.r-project.org/web/packages/changepoint/index.html)
 
 
 ## Execution

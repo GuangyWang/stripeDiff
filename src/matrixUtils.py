@@ -444,7 +444,11 @@ def reformat(infile, start, chrom, BP, outfile):
             row[13] = row[13].lstrip('"')
             row[13] = row[13].rstrip('"')
             line += row[13] + '\t'
-            line += str(int(row[14]) + start)
+            if row[14] == '0':
+                line += row[14]
+            
+            else:
+                line += str(int(row[14]) + start)
             outfh.write(line + '\n')
     outfh.close()
     return

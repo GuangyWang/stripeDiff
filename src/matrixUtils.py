@@ -446,7 +446,6 @@ def reformat(infile, start, chrom, BP, outfile):
             line += row[13] + '\t'
             if row[14] == '0':
                 line += row[14]
-            
             else:
                 line += str(int(row[14]) + start)
             outfh.write(line + '\n')

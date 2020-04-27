@@ -42,7 +42,7 @@ In general, stripeCalling.sh can be executed by following command line options:
         <-n name> defines two sample names and chromosome. e.g., wt,mutant,chr1
     
     Optional arguments:
-        [-l length] defines row and column number of split submatrix
+        [-l length] defines row and column number of split submatrix. Default: 300 
         [-o outDir] defines the path to output files. It must be set if the two input matrices are not under the same directory
         [-r resolution] defines the bin size. If it is not provided, the bin number of identified stripes will be output
 

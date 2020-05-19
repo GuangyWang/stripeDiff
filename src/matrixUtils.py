@@ -300,6 +300,7 @@ def combineStripe(command="combineStripe"):
     parser.add_argument('comparison', help="get comparison position")
     parser.add_argument('resolution', type=int, help="the resolution of contact matrix")
     parser.add_argument('name', help="two sample names and chromosome. e.g., wt,mutant,chr1")
+    parser.add_argument('--estimateLen', type=int, default=1, help="estimating stripe length or not")
     
     args = parser.parse_args()
     (sample1, sample2, chrom) = args.name.split(',')
@@ -317,7 +318,11 @@ def combineStripe(command="combineStripe"):
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
         '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" + \
-        '\t' + "direction" '\t' + "stripeLength" + '\n')
+        '\t' + "direction")
+    if args.estimateLen == 1:
+        outfh.write('\t' + "stripeLength" + '\n')
+    else:
+        outfh.write('\n')
     outfh.close()
 
     in_sample2 = "in_" + sample2 + "_not_" + sample1 + '_' + chrom + "_stripes.txt"
@@ -326,7 +331,11 @@ def combineStripe(command="combineStripe"):
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
         '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" + \
-       '\t' + "direction" '\t' + "stripeLength" + '\n')
+       '\t' + "direction")
+    if args.estimateLen == 1:
+        outfh.write('\t' + "stripeLength" + '\n')
+    else:
+        outfh.write('\n')
     outfh.close()
 
     # combine stripe
@@ -337,8 +346,8 @@ def combineStripe(command="combineStripe"):
         infile2 = args.data_path + sample1 + '_' + sample2 + '.' + position + "/2.txt"
         if (not os.path.exists(infile1)) or (not os.path.exists(infile2)):
             continue
-        reformat(infile1, start, chrom, args.resolution, in_sample1)
-        reformat(infile2, start, chrom, args.resolution, in_sample2)
+        reformat(infile1, start, chrom, args.resolution, in_sample1, args.estimateLen)
+        reformat(infile2, start, chrom, args.resolution, in_sample2, args.estimateLen)
 
 
 def deduplicate(command="deduplicate"):
@@ -364,17 +373,17 @@ def deduplicate(command="deduplicate"):
 
     outfh = open(args.outfile, 'w')
     # write the header line
-    outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t' + "rightEdge" + '\t' + "upPeak.sample1" +
-                '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" +
-                '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" +
-                '\t' + "direction" + '\t' + "stripeLength" + '\n')
+    #outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t' + "rightEdge" + '\t' + "upPeak.sample1" +
+    #           '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" +
+    #            '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" +
+    #            '\t' + "direction" + '\t' + "stripeLength" + '\n')
     with open(args.infile) as f:
         previousLine = "None"
         previousStripe = []
         for line in f:
             currentStripe = line.strip().split()
             if currentStripe[0] == "chrom":
-                continue
+                outfh.write(line) # write the header line
             else:
                 if previousLine == "None":
                     previousLine = line
@@ -406,7 +415,7 @@ def readComparison(infile):
     return mylist
 
 
-def reformat(infile, start, chrom, BP, outfile):
+def reformat(infile, start, chrom, BP, outfile, estimateLen):
     """
     reformat identified stripes
     : param infile: identified stripes
@@ -441,13 +450,18 @@ def reformat(infile, start, chrom, BP, outfile):
             for i in range(4, 13):
                 line += str(row[i]) + '\t'
             # row[13] is "left" or "right"
-            row[13] = row[13].lstrip('"')
-            row[13] = row[13].rstrip('"')
-            line += row[13] + '\t'
-            if row[14] == '0':
-                line += row[14]
+            if estimateLen == 1:
+                row[13] = row[13].lstrip('"')
+                row[13] = row[13].rstrip('"')
+                line += row[13] + '\t'
+                if row[14] == '0':
+                    line += row[14]
+                else:
+                    line += str((int(row[14]) + start)*BP)
             else:
-                line += str(int(row[14]) + start)
+                row[13] = row[13].lstrip('"')
+                row[13] = row[13].rstrip('"')
+                line += row[13]
             outfh.write(line + '\n')
     outfh.close()
     return

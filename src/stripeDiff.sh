@@ -20,6 +20,7 @@ usage() {
     echo "	[-l length] defines row and column number of split submatrix. Defult: 300"
     echo "	[-o outDir] defines the path to output files. It must be set if the two input matrices are not under the same directory"
     echo "	[-r resolution] defines the bin size in base pair. If it is not provided, the bin number of identified stripes will be output"
+    echo "	[-f] runs in a mode without estimating stripe length, which is faster than default mode"
     echo "*********************************************************"
     echo ""
     exit $1
@@ -32,11 +33,13 @@ outDir=""
 length=300
 # default bin size, can be set via -r
 resolution=""
+# estimate stripe length
+estimateLen=1
 ### The end of setting default options
 
 
 ### Parse command line arguments
-while getopts "a:b:l:n:o:hr:" opt
+while getopts "a:b:l:n:o:fhr:" opt
 do
 	case $opt in
 		a) matrixA=$OPTARG ;;
@@ -45,6 +48,7 @@ do
 		n) name=$OPTARG ;;
 		o) outDir=$OPTARG ;;
 		r) resolution=$OPTARG ;;
+		f) estimateLen=0 ;;
         h) usage 0 ;;
         [?]) usage 1 ;;
 	esac
@@ -73,7 +77,7 @@ fi
 # check if the strieDiff.R exists
 if [ ! -e "$srcDir"/stripeDiffCalling.R ]
 then
-	echo "*** error: stripeDiffCalling.R is not exist in $srcDir, please put all scripts in the directory containing stripeDiff.sh ***\n"
+	echo "*** error: stripeDiffCalling-length.R is not exist in $srcDir, please put all scripts in the directory containing stripeDiff.sh ***\n"
 	usage 1
 fi
 
@@ -190,6 +194,15 @@ fi
 
 ### Call differential stripes
 cd $outDir
+# determine if estimating stripe length is disabled
+rCode=""
+if [ "$estimateLen" == 1 ]
+then
+	rCode="stripeDiffCalling-length.R"
+else
+	rCode="stripeDiffCalling.R"
+fi
+
 # The stripes directory contains called differential stripes
 [ -d "${chrom}_stripes" ] && rm -r ${chrom}_stripes
 mkdir ${chrom}_stripes
@@ -210,7 +223,7 @@ while read -r comparison subchrA parameterA subchrB parameterB
 do
 	stripeOutDir="./${chrom}_stripes/${aliasA}_${aliasB}.${comparison}"
 	echo "Calling stripes for ${stripeOutDir} ......"
-	Rscript ${srcDir}/stripeDiffCalling-length.R -f ${subchrA},${subchrB} -p ${parameterA},${parameterB} -o ${stripeOutDir}
+	Rscript ${srcDir}/${rCode} -f ${subchrA},${subchrB} -p ${parameterA},${parameterB} -o ${stripeOutDir}
 	if [ $? != 0 ]
 	then
 		echo "*** error: Calling stripes for ${stripeOutDir} is failed  ***"
@@ -224,7 +237,7 @@ done < sorted_subchrComparison_${chrom}.txt
 
 ### combine called differential stripes
 # output: in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt and in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
-python ${srcDir}/matrixUtils.py combineStripe ${chrom}_stripes sorted_subchrComparison_${chrom}.txt $resolution $name
+python ${srcDir}/matrixUtils.py combineStripe ${chrom}_stripes sorted_subchrComparison_${chrom}.txt $resolution $name --estimateLen $estimateLen
 # sort differential stripes based on estimated position
 sort -k4,5 -n in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt > sorted_in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
 sort -k4,5 -n in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt > sorted_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt

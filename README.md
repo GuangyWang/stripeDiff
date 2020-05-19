@@ -44,6 +44,7 @@ In general, stripeCalling.sh can be executed by following command line options:
         [-l length] defines row and column number of split submatrix. Default: 300 
         [-o outDir] defines the path to output files. It must be set if the two input matrices are not under the same directory
         [-r resolution] defines the bin size. If it is not provided, the bin number of identified stripes will be output
+        [-f] runs in a mode without estimating stripe length, which is faster than default mode
 
 ## Input
 The main input are two Hi-C matrices. Each matrix could be in sparse (N * N) or verbose format. The verbose format should have three column. The first two columns are two genomic regions, and the third column is the interaction frequency. Here is an example of verbose format (the table header is not needed):

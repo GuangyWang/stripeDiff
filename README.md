@@ -75,6 +75,7 @@ stripeDiff has two output tables: stripes present in matrix A and stripes presen
 | 13th | P value of a stripe in Matrix B |
 | 14th | P value for a differential stripe |
 | 15th | direction of a stripe, could be left or right |
+| 16th | end of a stripe |
 
 
 ## Contacts

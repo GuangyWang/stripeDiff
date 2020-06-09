@@ -39,7 +39,7 @@ suppressMessages(library("optparse"))
 options(warn=-1)
 
 option_list = list(
-  make_option(c("-f", "--inputFile"), type="character", 
+  make_option(c("-f", "--inputFile"), type="character",  # need to change
               help="Input stripe file", metavar="character")
 ); 
 opt_parser = OptionParser(option_list=option_list);
@@ -49,4 +49,4 @@ inputFile = opt$inputFile
 stripe = read.table(inputFile)
 stripe.diff = stripeP(stripe)
 
-write.table(stripe.diff, file.path(getwd(), opt$output, '1.txt'), sep='\t', row.names = F)
+write.table(stripe.diff, file.path(getwd(), opt$output, '1.txt'), sep='\t', row.names = F) # need to change

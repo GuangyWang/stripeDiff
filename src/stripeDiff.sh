@@ -20,7 +20,8 @@ usage() {
     echo "	[-l length] defines row and column number of split submatrix. Defult: 300"
     echo "	[-o outDir] defines the path to output files. It must be set if the two input matrices are not under the same directory"
     echo "	[-r resolution] defines the bin size in base pair. If it is not provided, the bin number of identified stripes will be output"
-    echo "	[-f] runs in a mode without estimating stripe length, which is faster than default mode"
+    echo "	[-f] runs in a faster mode without estimating stripe length\n\n"
+    echo "For detailed informatiom, please feel free to refer: https://github.com/GuangyWang/stripeDiff"
     echo "*********************************************************"
     echo ""
     exit $1
@@ -33,7 +34,7 @@ outDir=""
 length=300
 # default bin size, can be set via -r
 resolution=""
-# estimate stripe length
+# estimate stripe length. To turn off, use -f
 estimateLen=1
 ### The end of setting default options
 
@@ -57,9 +58,7 @@ done
 
 date
 echo "The following command is running:"
-echo "	sh $0 $*"
-echo ""
-
+echo "	sh $0 $*\n"
 
 # Get absolute path for scripts and check if required scripts exist
 temp=$PWD
@@ -68,18 +67,27 @@ cd $srcDir
 srcDir=$PWD
 cd $temp
 
+
+### check if all required scripts exist in desired directory
 # check if matrixUtils.py exists
 if [ ! -e "$srcDir"/matrixUtils.py ]
 then
 	echo "*** error: matrixUtils.py is not exist in $srcDir, please put all scripts in the directory containing stripeDiff.sh ***\n"
 	usage 1
 fi
-# check if the strieDiff.R exists
-if [ ! -e "$srcDir"/stripeDiffCalling.R ]
+# check if the stripe_detect.R exists
+if [ ! -e "$srcDir"/stripe_detect.R ]
 then
-	echo "*** error: stripeDiffCalling-length.R is not exist in $srcDir, please put all scripts in the directory containing stripeDiff.sh ***\n"
+	echo "*** error: stripe_detect.R is not exist in $srcDir, please put all scripts in the directory containing stripeDiff.sh ***\n"
 	usage 1
 fi
+# check if the differential_score.R exists
+if [ ! -e "$srcDir"/differential_score.R ]
+then
+	echo "*** error: differential_score.R is not exist in $srcDir, please put all scripts in the directory containing stripeDiff.sh ***\n"
+	usage 1
+fi
+### End of checking requried scripts
 
 
 ### Check command line arguments
@@ -198,7 +206,7 @@ cd $outDir
 rCode=""
 if [ "$estimateLen" == 1 ]
 then
-	rCode="stripeDiffCalling-length.R"
+	rCode="stripe_detect.R"
 else
 	rCode="stripeDiffCalling.R"
 fi
@@ -241,14 +249,28 @@ python ${srcDir}/matrixUtils.py combineStripe ${chrom}_stripes sorted_subchrComp
 # sort differential stripes based on estimated position
 sort -k4,5 -n in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt > sorted_in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt
 sort -k4,5 -n in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt > sorted_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt
+### End of combining
+
+
+### calculate P values for each differential stripe
+infile="sorted_in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt"
+outfile="in_${aliasA}_not_${aliasB}_${chrom}_stripes_with_p.txt"
+Rscript ${srcDir}/differential_score.R -f $infile -o $outfile
+
+infile="sorted_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt"
+outfile="in_${aliasB}_not_${aliasA}_${chrom}_stripes_with_p.txt"
+Rscript ${srcDir}/differential_score.R -f $infile -o $outfile
+### End of calculating P values
+
 
 # remove duplications
-infile="sorted_in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt"
+infile="in_${aliasA}_not_${aliasB}_${chrom}_stripes_with_p.txt"
 outfile="deduplicated_in_${aliasA}_not_${aliasB}_${chrom}_stripes.txt"
-python ${srcDir}/matrixUtils.py deduplicate $infile $outfile
-infile="sorted_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt"
+python ${srcDir}/matrixUtils.py deduplicate $infile $outfile --estimateLen $estimateLen
+
+infile="in_${aliasB}_not_${aliasA}_${chrom}_stripes_with_p.txt"
 outfile="deduplicated_in_${aliasB}_not_${aliasA}_${chrom}_stripes.txt"
-python ${srcDir}/matrixUtils.py deduplicate $infile $outfile
+python ${srcDir}/matrixUtils.py deduplicate $infile $outfile --estimateLen $estimateLen
 ### End of combining called differential stripes
 
 

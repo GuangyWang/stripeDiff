@@ -317,12 +317,8 @@ def combineStripe(command="combineStripe"):
     # write the header
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
-        '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" + \
-        '\t' + "direction")
-    if args.estimateLen == 1:
-        outfh.write('\t' + "stripeLength" + '\n')
-    else:
-        outfh.write('\n')
+        '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + \
+        '\t' + "direction" '\t' + "stripeLength" + '\n')
     outfh.close()
 
     in_sample2 = "in_" + sample2 + "_not_" + sample1 + '_' + chrom + "_stripes.txt"
@@ -330,12 +326,8 @@ def combineStripe(command="combineStripe"):
     # write the header
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
-        '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" + \
-       '\t' + "direction")
-    if args.estimateLen == 1:
-        outfh.write('\t' + "stripeLength" + '\n')
-    else:
-        outfh.write('\n')
+        '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + \
+       '\t' + "direction" '\t' + "stripeLength" + '\n')
     outfh.close()
 
     # combine stripe
@@ -352,7 +344,7 @@ def combineStripe(command="combineStripe"):
 
 def deduplicate(command="deduplicate"):
     '''
-    deduplicate: remove duplicated stripes
+    deduplicate: remove duplicated stripes. For overlapping stripes, keep the stripe with lowest P value
     '''
 
     if (len(sys.argv) < 3) and ('-h' not in sys.argv) and ('--help' not in sys.argv):
@@ -369,15 +361,16 @@ def deduplicate(command="deduplicate"):
 
     parser.add_argument('infile', help="input file")
     parser.add_argument('outfile', help="output file")
+    parser.add_argument('--estimateLen', type=int, default=1, help="estimating stripe length or not")
     args = parser.parse_args()
 
     outfh = open(args.outfile, 'w')
-    # write the header line
-    #outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t' + "rightEdge" + '\t' + "upPeak.sample1" +
-    #           '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" +
-    #            '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + '\t' + "diffStrap.pValue" +
-    #            '\t' + "direction" + '\t' + "stripeLength" + '\n')
     with open(args.infile) as f:
+        # targetIndex is the column number with p.chip value
+        targetIndex = 16
+        if args.estimateLen == 0:
+            targetIndex = 15
+
         previousLine = "None"
         previousStripe = []
         for line in f:
@@ -388,11 +381,11 @@ def deduplicate(command="deduplicate"):
                 if previousLine == "None":
                     previousLine = line
                     previousStripe = currentStripe[:]
-                elif int(currentStripe[3]) <= int(previousStripe[4]):
-                    if float(currentStripe[13]) < float(previousStripe[13]):
+                elif int(currentStripe[3]) <= int(previousStripe[4]): # overlap exists
+                    if float(currentStripe[targetIndex]) < float(previousStripe[targetIndex]):
                         previousLine = line
                         previousStripe = currentStripe[:]
-                else:
+                else: # no overlap with previous stripe
                     outfh.write(previousLine)
                     previousLine = line
                     previousStripe = currentStripe[:]
@@ -447,21 +440,21 @@ def reformat(infile, start, chrom, BP, outfile, estimateLen):
                 line += str((int(row[2]) + start)*BP) + '\t'
                 line += str((int(row[3]) + start)*BP) + '\t'
 
-            for i in range(4, 13):
+            for i in range(4, 12):
                 line += str(row[i]) + '\t'
-            # row[13] is "left" or "right"
+            # row[12] is "left" or "right"
             if estimateLen == 1:
-                row[13] = row[13].lstrip('"')
-                row[13] = row[13].rstrip('"')
-                line += row[13] + '\t'
-                if row[14] == '0':
-                    line += row[14]
+                row[12] = row[12].lstrip('"')
+                row[12] = row[12].rstrip('"')
+                line += row[12] + '\t'
+                if row[13] == '0':
+                    line += row[13]
                 else:
-                    line += str((int(row[14]) + start)*BP)
+                    line += str((int(row[13]) + start)*BP)
             else:
-                row[13] = row[13].lstrip('"')
-                row[13] = row[13].rstrip('"')
-                line += row[13]
+                row[12] = row[12].lstrip('"')
+                row[12] = row[12].rstrip('"')
+                line += row[12]
             outfh.write(line + '\n')
     outfh.close()
     return

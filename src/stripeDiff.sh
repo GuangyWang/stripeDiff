@@ -208,7 +208,7 @@ if [ "$estimateLen" == 1 ]
 then
 	rCode="stripe_detect.R"
 else
-	rCode="stripeDiffCalling.R"
+	rCode="stripe_detect_no_length.R"
 fi
 
 # The stripes directory contains called differential stripes

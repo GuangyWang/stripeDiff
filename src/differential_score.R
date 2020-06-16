@@ -25,8 +25,7 @@ stripeP <- function(stripe){
   x2.norm = (x2-m2)/sd2
   chiq = x1.norm^2+x2.norm^2
   stripe$chiq = chiq
-  stripe$p.chip = 1-pchisq(chiq,1)
-  
+  stripe$p.chiq = 1-pchisq(chiq,1)
   stripe$up.tscore = (x1-m1)/(sd1)
   stripe$p.up = 2*pt(-abs(stripe$up.tscore),df=nrow(stripe)-1)
   stripe$down.tscore = (x2-m2)/(sd2)

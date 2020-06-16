@@ -318,7 +318,11 @@ def combineStripe(command="combineStripe"):
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
         '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + \
-        '\t' + "direction" '\t' + "stripeLength" + '\n')
+        '\t' + "direction")
+    if args.estimateLen == 1:
+        outfh.write('\t' + "stripeLength" + '\n')
+    else:
+        outfh.write('\n')
     outfh.close()
 
     in_sample2 = "in_" + sample2 + "_not_" + sample1 + '_' + chrom + "_stripes.txt"
@@ -327,7 +331,11 @@ def combineStripe(command="combineStripe"):
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
         '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + \
-       '\t' + "direction" '\t' + "stripeLength" + '\n')
+       '\t' + "direction")
+    if args.estimateLen == 1:
+        outfh.write('\t' + "stripeLength" + '\n')
+    else:
+        outfh.write('\n')
     outfh.close()
 
     # combine stripe
@@ -442,18 +450,17 @@ def reformat(infile, start, chrom, BP, outfile, estimateLen):
 
             for i in range(4, 12):
                 line += str(row[i]) + '\t'
+                
             # row[12] is "left" or "right"
+            row[12] = row[12].lstrip('"')
+            row[12] = row[12].rstrip('"')
             if estimateLen == 1:
-                row[12] = row[12].lstrip('"')
-                row[12] = row[12].rstrip('"')
                 line += row[12] + '\t'
                 if row[13] == '0':
                     line += row[13]
                 else:
                     line += str((int(row[13]) + start)*BP)
             else:
-                row[12] = row[12].lstrip('"')
-                row[12] = row[12].rstrip('"')
                 line += row[12]
             outfh.write(line + '\n')
     outfh.close()

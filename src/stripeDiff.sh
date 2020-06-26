@@ -210,7 +210,7 @@ then
 else
 	rCode="stripe_detect_no_length.R"
 fi
-
+rCode="test_noLength.R"
 # The stripes directory contains called differential stripes
 [ -d "${chrom}_stripes" ] && rm -r ${chrom}_stripes
 mkdir ${chrom}_stripes
@@ -231,6 +231,7 @@ while read -r comparison subchrA parameterA subchrB parameterB
 do
 	stripeOutDir="./${chrom}_stripes/${aliasA}_${aliasB}.${comparison}"
 	echo "Calling stripes for ${stripeOutDir} ......"
+	echo "Running command: Rscript ${srcDir}/${rCode} -f ${subchrA},${subchrB} -p ${parameterA},${parameterB} -o ${stripeOutDir}"
 	Rscript ${srcDir}/${rCode} -f ${subchrA},${subchrB} -p ${parameterA},${parameterB} -o ${stripeOutDir}
 	if [ $? != 0 ]
 	then

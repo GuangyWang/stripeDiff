@@ -178,8 +178,26 @@ then
 fi
 COMMENT
 
+echo "hello"
+# check the input format
+matrixFormat="dense"
+#colNumA=$(tail -1 $matrxA | awk -F '\t' '{print NF}')
+#colNumB=$(tail -1 $matrxB | awk -F '\t' '{print NF}')
+maxCorA=$(tail -1 "$matrixA" | cut -f 2)
+maxCorB=$(tail -1 "$matrixB" | cut -f 2)
+dim=0
+if [ "$maxCorA" -ge "$maxCorB" ]
+then
+	dim="$maxCorB"
+else
+	dim="$maxCorA"
+fi
+
+# Done for checking input format
+
+echo "The maxmiun interacting coordinate is: $dim\n"
 echo "Spliting $matrixA ......"
-python ${srcDir}/matrixUtils.py matrixSplit $matrixA -l $length -o ${outDir}/${aliasA}_${chrom}_splitMatrix
+python ${srcDir}/matrixUtils.py matrixSplit $matrixA -l $length -o ${outDir}/${aliasA}_${chrom}_splitMatrix -m $dim
 if [ $? != 0 ]
 then
 	echo "*** error: Split $matrixA failed ***"
@@ -189,7 +207,7 @@ else
 fi
 
 echo "Spliting $matrixB ......"
-python ${srcDir}/matrixUtils.py matrixSplit $matrixB -l $length -o ${outDir}/${aliasB}_${chrom}_splitMatrix
+python ${srcDir}/matrixUtils.py matrixSplit $matrixB -l $length -o ${outDir}/${aliasB}_${chrom}_splitMatrix -m $dim
 if [ $? != 0 ]
 then
 	echo "*** error: Split $matrixB failed ***"

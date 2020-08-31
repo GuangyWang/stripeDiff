@@ -184,7 +184,7 @@ matrixFormat="dense"
 dim=0
 colNumA=$(awk 'NR==1 {print; exit}' "$matrxA" | awk -F '\t' '{print NF}')
 colNumB=$(awk 'NR==1 {print; exit}' "$matrxB" | awk -F '\t' '{print NF}')
-if [ "$colNumA" -ge 3 ]
+if [ "$colNumA" -ge 4 ]
 then
 	dim=1 # this parameter will be discard for a dense matrix
 else

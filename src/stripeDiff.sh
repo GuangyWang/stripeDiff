@@ -181,18 +181,22 @@ COMMENT
 echo "hello"
 # check the input format
 matrixFormat="dense"
-#colNumA=$(tail -1 $matrxA | awk -F '\t' '{print NF}')
-#colNumB=$(tail -1 $matrxB | awk -F '\t' '{print NF}')
-maxCorA=$(tail -1 "$matrixA" | cut -f 2)
-maxCorB=$(tail -1 "$matrixB" | cut -f 2)
 dim=0
-if [ "$maxCorA" -ge "$maxCorB" ]
+colNumA=$(awk 'NR==1 {print; exit}' "$matrxA" | awk -F '\t' '{print NF}')
+colNumB=$(awk 'NR==1 {print; exit}' "$matrxB" | awk -F '\t' '{print NF}')
+if [ "$colNumA" -ge 3 ]
 then
-	dim="$maxCorB"
+	dim=1 # this parameter will be discard for a dense matrix
 else
-	dim="$maxCorA"
+	maxCorA=$(awk 'END {print}' "$matrixA" | cut -f 2)
+	maxCorB=$(awk 'END {print}' "$matrixB" | cut -f 2)
+	if [ "$maxCorA" -ge "$maxCorB" ]
+	then
+		dim="$maxCorB"
+	else
+		dim="$maxCorA"
+	fi
 fi
-
 # Done for checking input format
 
 echo "The maxmiun interacting coordinate is: $dim\n"

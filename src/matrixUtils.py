@@ -144,7 +144,7 @@ def matrixSplit(command='matrixSplit'):
 
     parser.add_argument('--resolution', dest="resolution", default='None', help="resolution for Hi-C contact map. If not provided, "
                                                                                 "it will be inferred from verbose matrix")
-    parser.add_argument('--max_site', '-m', dest="max_site", default=0, type=float, help="the maximum coordinate in the contact map")
+    parser.add_argument('--max_site', '-m', dest="max_site", default=0, type=int, help="the maximum coordinate in the contact map")
     args = parser.parse_args()
 
     if args.output == 'None':

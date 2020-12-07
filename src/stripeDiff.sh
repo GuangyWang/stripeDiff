@@ -54,7 +54,7 @@ do
         [?]) usage 1 ;;
 	esac
 done
-
+echo "estimateLen is: $estimateLen"
 
 date
 echo "The following command is running:"
@@ -182,8 +182,8 @@ echo "hello"
 # check the input format
 matrixFormat="dense"
 dim=0
-colNumA=$(awk 'NR==1 {print; exit}' "$matrxA" | awk -F '\t' '{print NF}')
-colNumB=$(awk 'NR==1 {print; exit}' "$matrxB" | awk -F '\t' '{print NF}')
+colNumA=$(awk 'NR==1 {print; exit}' "$matrixA" | awk -F '\t' '{print NF}')
+colNumB=$(awk 'NR==1 {print; exit}' "$matrixB" | awk -F '\t' '{print NF}')
 if [ "$colNumA" -ge 4 ]
 then
 	dim=1 # this parameter will be discard for a dense matrix

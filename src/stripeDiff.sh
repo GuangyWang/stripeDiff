@@ -10,7 +10,7 @@
 ### usage function tells users how to run stripeDiff.sh
 usage() {
 	echo "***************** How to use stripeDiff *****************"
-    echo "Usage: sh /path/to/stripeDiff.sh [options]* <-a matrixA> <-b matrixB>"
+    echo "Usage: sh /path/to/stripeDiff.sh [options]* <-a matrixA> <-b matrixB> <-n name>"
     echo "Required arguments:"
     echo " 	<-a matrixA> defines the input matrix A"
     echo " 	<-b matrixB> defines the input matrix B"
@@ -20,8 +20,10 @@ usage() {
     echo "	[-l length] defines row and column number of split submatrix. Defult: 300"
     echo "	[-o outDir] defines the path to output files. It must be set if the two input matrices are not under the same directory"
     echo "	[-r resolution] defines the bin size in base pair. If it is not provided, the bin number of identified stripes will be output"
+    echo "  [-c cutoff] defines maximum interaction in matrix A and atrix B. e.g., 100,100"
+    echo "              If it is not provided, the number will be calculated based on input matrices"
     echo "	[-f] runs in a faster mode without estimating stripe length\n\n"
-    echo "For detailed informatiom, please feel free to refer: https://github.com/GuangyWang/stripeDiff"
+    echo "For detailed informatiom, please feel free to refer to: https://github.com/GuangyWang/stripeDiff"
     echo "*********************************************************"
     echo ""
     exit $1
@@ -36,11 +38,13 @@ length=300
 resolution=""
 # estimate stripe length. To turn off, use -f
 estimateLen=1
+# the maximum interaction cutoff for matrix A and B
+interCutoff=""
 ### The end of setting default options
 
 
 ### Parse command line arguments
-while getopts "a:b:l:n:o:fhr:" opt
+while getopts "a:b:l:n:o:fhrc:" opt
 do
 	case $opt in
 		a) matrixA=$OPTARG ;;
@@ -49,13 +53,14 @@ do
 		n) name=$OPTARG ;;
 		o) outDir=$OPTARG ;;
 		r) resolution=$OPTARG ;;
+        c) interCutoff=$OPTARG ;;
 		f) estimateLen=0 ;;
         h) usage 0 ;;
         [?]) usage 1 ;;
 	esac
 done
-echo "estimateLen is: $estimateLen"
 
+echo "estimate Lenght is: $estimateLen"
 date
 echo "The following command is running:"
 echo "	sh $0 $*\n"
@@ -156,7 +161,7 @@ else
 	if [ -z "$aliasA" -o -z "$aliasB" -o -z "$chrom" ]
 	then
 		echo "*** error: matrix name and chromosome should be separated by ',' and without any space between them ***"
-		echo "***        e.g., mt,mutant,chr1 ***"
+		echo "***        e.g., wt,mutant,chr1 ***"
 		usage 1
 	fi
 fi
@@ -253,6 +258,13 @@ while read -r comparison subchrA parameterA subchrB parameterB
 do
 	stripeOutDir="./${chrom}_stripes/${aliasA}_${aliasB}.${comparison}"
 	echo "Calling stripes for ${stripeOutDir} ......"
+    ### check if interCutoff is provided
+    if [ ! -z "$interCutoff" ]
+    then
+        parameterA=$(awk -F"," '{print $1}' <<< $interCutoff)
+        parameterB=$(awk -F"," '{print $2}' <<< $interCutoff)
+    fi
+    
 	echo "Running command: Rscript ${srcDir}/${rCode} -f ${subchrA},${subchrB} -p ${parameterA},${parameterB} -o ${stripeOutDir}"
 	Rscript ${srcDir}/${rCode} -f ${subchrA},${subchrB} -p ${parameterA},${parameterB} -o ${stripeOutDir}
 	if [ $? != 0 ]

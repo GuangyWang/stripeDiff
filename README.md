@@ -80,4 +80,4 @@ stripeDiff has two output tables: stripes present in matrix A and stripes presen
 
 
 ## Contacts
-If you find any bugs or have difficulties in using stripeDiff, please feel free to contact Guangyu Wang (gwang2@houstonmethodist.org).
+If you find any bugs or have difficulties in using stripeDiff, please feel free to contact Guangyu Wang (guangywang@gmail.com).

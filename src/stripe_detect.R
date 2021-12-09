@@ -272,6 +272,9 @@ matchPeaks <- function(upSide, downSide, p, map, outputName5, outputName6, outpu
 }
 
 reduceStripe <- function(stripe, matchCutoff){
+  # reduce the overlapped stripe using a overlapped ratio as cutoff
+  # stripe: stripes before reducing the overlapping
+  # matchCutoff: overlapped ratio as cutoff
   if(nrow(stripe)>2){
     stripeReduce = data.frame(matrix(ncol = 4, nrow = 0))
     colnames(stripeReduce) = c('up_loc', 'down_loc', 'leftEdge', 'rightEdge')

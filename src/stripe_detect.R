@@ -160,6 +160,7 @@ stripeCalling <- function(contactMap, upLimit, outputPath, outputName1, outputNa
 }
 
 oneSideData <- function(bcpMean){
+  # define all up and down peaks from Hi-C data
   # input: sum of diff Hi-C contact on each line
   # output: up peaks and down peaks
   rawData = bcpMean$data[,2]
@@ -208,6 +209,7 @@ oneSideData <- function(bcpMean){
 }
 
 matchPeaks <- function(upSide, downSide, p, map, outputName5, outputName6, outputName7){
+  # find all pairs of up and down peaks from all potiential up peaks and down peaks
   upLocalPeak = localPeak(outputName5, outputName7, x= upSide$data[,1],y= upSide$posterior.mean, peakPvalue = 0.9)  # local peak 
   downLocalPeak = localPeak(outputName6, outputName7, x = downSide$data[,1], y = -downSide$posterior.mean, peakPvalue = 0.8)  # local peak 
   

@@ -45,6 +45,8 @@ In general, stripeCalling.sh can be executed by following command line options:
         [-l length] defines row and column number of split submatrix. Default: 300 
         [-o outDir] defines the path to output files. It must be set if the two input matrices are not under the same directory
         [-r resolution] defines the bin size. If it is not provided, the bin number of identified stripes will be output
+        [-c cutoff] defines maximum interaction in matrix A and atrix B. e.g., 100,100
+            If "-c" is not provided, the number will be calculated based on input matrices
         [-f] runs in a mode without estimating stripe length, which is faster than default mode
 
 ## Input

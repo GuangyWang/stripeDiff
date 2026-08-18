@@ -3,7 +3,7 @@ import os
 import sys
 import argparse
 
-def file_split(file, resolution, outfile, length, print_subcontact, aliases):
+def file_split(file, resolution, outfile, length, print_subcontact, aliases, max_site):
     '''
     divide whole chromosome into different sub chromosome files and calculate cutoffs
     :param file: input chromosome file
@@ -19,7 +19,7 @@ def file_split(file, resolution, outfile, length, print_subcontact, aliases):
         filename = aliases
     else:
         filename = os.path.splitext(base)[0]
-    contact_map, temp_res = readMatrix(file, resolution)
+    contact_map, temp_res = readMatrix(file, resolution, max_site)
 
     r, c = contact_map.shape
     num = int(r/length)
@@ -144,6 +144,7 @@ def matrixSplit(command='matrixSplit'):
 
     parser.add_argument('--resolution', dest="resolution", default='None', help="resolution for Hi-C contact map. If not provided, "
                                                                                 "it will be inferred from verbose matrix")
+    parser.add_argument('--max_site', '-m', dest="max_site", default=0, type=int, help="the maximum coordinate in the contact map")
     args = parser.parse_args()
 
     if args.output == 'None':
@@ -157,16 +158,16 @@ def matrixSplit(command='matrixSplit'):
     else:
         os.mkdir(outputPath)
         if os.path.exists(args.contact_map):
-            file_split(args.contact_map, args.resolution, args.output, int(args.length), args.print_subcontact, args.aliases)
+            file_split(args.contact_map, args.resolution, args.output, int(args.length), args.print_subcontact, args.aliases, args.max_site)
         else:
             if os.path.exists(os.path.join(os.getcwd(), args.contact_map)):
                 file_split(os.path.exists(os.path.join(os.getcwd(), args.contact_map)), args.resolution,
-                           outputPath, int(args.length), args.print_subcontact, args.aliases)
+                           outputPath, int(args.length), args.print_subcontact, args.aliases, args.max_site)
             else:
                 print('Input file does not exit')
 
 
-def readMatrix(file, resolution):
+def readMatrix(file, resolution, max_site):
     """
     read input matrix
     :param file: input matrix, could be verbose or spare format (refer juicer dump)
@@ -181,13 +182,11 @@ def readMatrix(file, resolution):
         resolution = res[0, 1] - res[0, 0]
         return (res, resolution)
     else:
-        max_site = 0
         inferred_resolution = 0
         for line in fh:
             (start, end, interaction) = line.strip().split()
             start = int(start)
             end = int(end)
-            max_site = max(max_site, start, end)
             distance = abs(start - end)
             if inferred_resolution == 0:
                 inferred_resolution = distance
@@ -211,6 +210,8 @@ def readMatrix(file, resolution):
                 interaction = float(interaction)
                 row_index = start // resolution
                 col_index = end // resolution
+                if row_index > dim - 1 or col_index > dim -1:
+                    continue
                 res[row_index][col_index] = interaction
                 res[col_index][row_index] = interaction
         return (res, resolution)
@@ -318,7 +319,11 @@ def combineStripe(command="combineStripe"):
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
         '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + \
-        '\t' + "direction" '\t' + "stripeLength" + '\n')
+        '\t' + "direction")
+    if args.estimateLen == 1:
+        outfh.write('\t' + "stripeLength" + '\n')
+    else:
+        outfh.write('\n')
     outfh.close()
 
     in_sample2 = "in_" + sample2 + "_not_" + sample1 + '_' + chrom + "_stripes.txt"
@@ -327,7 +332,11 @@ def combineStripe(command="combineStripe"):
     outfh.write("chrom\t" + "upPeak.loc" + '\t' + "downPeak.loc" + '\t' + "leftEdge" + '\t'+ "rightEdge" + '\t' + "upPeak.sample1" + \
         '\t' + "downPeak.sample1" + '\t' + "logFoldChange.sample1" + '\t' + "strap.pValue.sample1" + '\t' + "upPeak.sample2" + \
         '\t' + "downPeak.sample2" + '\t' + "logFoldChange.sample2" + '\t' + "strap.pValue.sample2" + \
-       '\t' + "direction" '\t' + "stripeLength" + '\n')
+       '\t' + "direction")
+    if args.estimateLen == 1:
+        outfh.write('\t' + "stripeLength" + '\n')
+    else:
+        outfh.write('\n')
     outfh.close()
 
     # combine stripe
@@ -442,18 +451,17 @@ def reformat(infile, start, chrom, BP, outfile, estimateLen):
 
             for i in range(4, 12):
                 line += str(row[i]) + '\t'
+                
             # row[12] is "left" or "right"
+            row[12] = row[12].lstrip('"')
+            row[12] = row[12].rstrip('"')
             if estimateLen == 1:
-                row[12] = row[12].lstrip('"')
-                row[12] = row[12].rstrip('"')
                 line += row[12] + '\t'
                 if row[13] == '0':
                     line += row[13]
                 else:
                     line += str((int(row[13]) + start)*BP)
             else:
-                row[12] = row[12].lstrip('"')
-                row[12] = row[12].rstrip('"')
                 line += row[12]
             outfh.write(line + '\n')
     outfh.close()
